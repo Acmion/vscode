@@ -18,7 +18,6 @@ import { IThemeService, registerThemingParticipant } from 'vs/platform/theme/com
 import { editorBackground, contrastBorder } from 'vs/platform/theme/common/colorRegistry';
 import { Themable, EDITOR_GROUP_HEADER_TABS_BORDER, EDITOR_GROUP_HEADER_TABS_BACKGROUND, EDITOR_GROUP_HEADER_NO_TABS_BACKGROUND, EDITOR_GROUP_EMPTY_BACKGROUND, EDITOR_GROUP_FOCUSED_EMPTY_BORDER } from 'vs/workbench/common/theme';
 import { IMoveEditorOptions, ICopyEditorOptions, ICloseEditorsFilter, IGroupChangeEvent, GroupChangeKind, EditorsOrder, GroupsOrder, ICloseEditorOptions } from 'vs/workbench/services/editor/common/editorGroupsService';
-import { TabsTitleControl } from 'vs/workbench/browser/parts/editor/tabsTitleControl';
 import { EditorControl } from 'vs/workbench/browser/parts/editor/editorControl';
 import { IEditorProgressService } from 'vs/platform/progress/common/progress';
 import { EditorProgressService } from 'vs/workbench/services/progress/browser/editorProgressService';
@@ -50,6 +49,7 @@ import { guessMimeTypes } from 'vs/base/common/mime';
 import { extname } from 'vs/base/common/resources';
 import { Schemas } from 'vs/base/common/network';
 import { EditorActivation } from 'vs/platform/editor/common/editor';
+import { TabsTitleControl } from 'vs/workbench/browser/parts/editor/tabsTitleControl';
 
 export class EditorGroupView extends Themable implements IEditorGroupView {
 
@@ -728,6 +728,23 @@ export class EditorGroupView extends Themable implements IEditorGroupView {
 		return this._group.count;
 	}
 
+	get hardPinnedCount(): number {
+		var count = 0;
+		var editors = this._group.getEditors();
+		for (var i = 0; i < editors.length; i++) {
+			if (editors[i].isHardPinned()) {
+				count++;
+			}
+		}
+
+		return count;
+
+	}
+
+	get notHardPinnedCount(): number {
+		return this.count - this.hardPinnedCount;
+	}
+
 	get activeControl(): IVisibleEditor | undefined {
 		return this.editorControl ? withNullAsUndefined(this.editorControl.activeControl) : undefined;
 	}
@@ -789,6 +806,29 @@ export class EditorGroupView extends Themable implements IEditorGroupView {
 
 			// Forward to title control
 			this.titleAreaControl.pinEditor(editor);
+		}
+	}
+
+	hardPinEditor(editor: EditorInput | undefined = this.activeEditor || undefined): void {
+		if (editor) {
+
+			if (editor.isHardPinned()) {
+				// If an editor is hard pinned, then when it
+				// gets unhard pinned it should appear first in
+				// the list of not hard pinned tabs.
+				this.moveEditor(editor, this, <IMoveEditorOptions> { index: this.hardPinnedCount - 1 });
+			} else {
+				// If an editor is not hard pinned, then it should
+				// take the last place of hard pinned editors.
+
+				this.moveEditor(editor, this, <IMoveEditorOptions> { index: this.hardPinnedCount });
+			}
+
+			// Update model
+			this._group.hardPin(editor);
+
+			// Forward to title control
+			this.titleAreaControl.hardPinEditor(editor);
 		}
 	}
 

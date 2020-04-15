@@ -324,6 +324,16 @@ export interface IEditorInput extends IDisposable {
 	 * Returns if the other object matches this input.
 	 */
 	matches(other: unknown): boolean;
+
+	/**
+	 * Returns whether this input is hard pinned or not.
+	 */
+	isHardPinned(): boolean;
+
+	/**
+	 * Sets whether this input is hard pinned or not.
+	 */
+	setHardPinned(hardPinned: boolean): void;
 }
 
 /**
@@ -342,6 +352,7 @@ export abstract class EditorInput extends Disposable implements IEditorInput {
 	readonly onDispose: Event<void> = this._onDispose.event;
 
 	private disposed: boolean = false;
+	private hardPinned: boolean = false;
 
 	/**
 	 * Returns the unique type identifier of this input.
@@ -461,6 +472,20 @@ export abstract class EditorInput extends Disposable implements IEditorInput {
 	 */
 	isDisposed(): boolean {
 		return this.disposed;
+	}
+
+	/**
+	 * Returns whether this input is hard pinned or not.
+	 */
+	isHardPinned(): boolean {
+		return this.hardPinned;
+	}
+
+	/**
+	 * Sets whether this input is hard pinned or not.
+	 */
+	setHardPinned(hardPinned: boolean): void {
+		this.hardPinned = hardPinned;
 	}
 
 	/**
@@ -749,6 +774,13 @@ export class EditorOptions implements IEditorOptions {
 	 * An editor that is not pinned will always get replaced by another editor that is not pinned.
 	 */
 	pinned: boolean | undefined;
+
+	/**
+	 * An editor that is hard pinned remains visible in the editor stack even when the tab control hase been
+	 * scrolled.
+	 */
+	hardPinned: boolean | undefined;
+
 
 	/**
 	 * The index in the document stack where to insert the editor into when opening.

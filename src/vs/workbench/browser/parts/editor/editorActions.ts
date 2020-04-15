@@ -475,6 +475,53 @@ export class CloseEditorAction extends Action {
 	}
 }
 
+export class HardPinOneEditorAction extends Action {
+
+	static readonly ID = 'workbench.action.hardPinOneEditor';
+	static readonly LABEL = nls.localize('hardPinOneEditor', "Pin / Unpin");
+
+	constructor(
+		id: string,
+		label: string,
+		@IEditorGroupsService private readonly editorGroupService: IEditorGroupsService
+	) {
+		super(id, label, 'codicon-pin');
+	}
+
+	run(context?: IEditorCommandsContext): Promise<any> {
+		let group: IEditorGroup | undefined;
+		let editorIndex: number | undefined;
+		if (context) {
+			group = this.editorGroupService.getGroup(context.groupId);
+
+			if (group) {
+				editorIndex = context.editorIndex; // only allow editor at index if group is valid
+			}
+		}
+
+		if (!group) {
+			group = this.editorGroupService.activeGroup;
+		}
+
+		// Hard pin specific editor in group
+		if (typeof editorIndex === 'number') {
+			const editorAtIndex = group.getEditor(editorIndex);
+			if (editorAtIndex) {
+				group.hardPinEditor(editorAtIndex);
+				return Promise.resolve(true);
+			}
+		}
+
+		// Otherwise hard pin active editor in group
+		if (group.activeEditor) {
+			group.hardPinEditor(group.activeEditor);
+			return Promise.resolve(true);
+		}
+
+		return Promise.resolve(false);
+	}
+}
+
 export class CloseOneEditorAction extends Action {
 
 	static readonly ID = 'workbench.action.closeActiveEditor';

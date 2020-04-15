@@ -49,10 +49,10 @@ export interface IToolbarActions {
 
 export abstract class TitleControl extends Themable {
 
-	protected readonly groupTransfer = LocalSelectionTransfer.getInstance<DraggedEditorGroupIdentifier>();
-	protected readonly editorTransfer = LocalSelectionTransfer.getInstance<DraggedEditorIdentifier>();
+	public readonly groupTransfer = LocalSelectionTransfer.getInstance<DraggedEditorGroupIdentifier>();
+	public readonly editorTransfer = LocalSelectionTransfer.getInstance<DraggedEditorIdentifier>();
 
-	protected breadcrumbsControl?: BreadcrumbsControl;
+	public breadcrumbsControl?: BreadcrumbsControl;
 
 	private currentPrimaryEditorActionIds: string[] = [];
 	private currentSecondaryEditorActionIds: string[] = [];
@@ -289,7 +289,7 @@ export abstract class TitleControl extends Themable {
 		}));
 	}
 
-	protected onContextMenu(editor: IEditorInput, e: Event, node: HTMLElement): void {
+	public onContextMenu(editor: IEditorInput, e: Event, node: HTMLElement): void {
 
 		// Update contexts based on editor picked and remember previous to restore
 		const currentResourceContext = this.resourceContext.get();
@@ -333,7 +333,7 @@ export abstract class TitleControl extends Themable {
 		return this.keybindingService.lookupKeybinding(action.id);
 	}
 
-	protected getKeybindingLabel(action: IAction): string | undefined {
+	public getKeybindingLabel(action: IAction): string | undefined {
 		const keybinding = this.getKeybinding(action);
 
 		return keybinding ? withNullAsUndefined(keybinding.getLabel()) : undefined;
@@ -351,6 +351,8 @@ export abstract class TitleControl extends Themable {
 
 	abstract pinEditor(editor: IEditorInput): void;
 
+	abstract hardPinEditor(editor: IEditorInput): void;
+
 	abstract setActive(isActive: boolean): void;
 
 	abstract updateEditorLabel(editor: IEditorInput): void;
@@ -363,7 +365,7 @@ export abstract class TitleControl extends Themable {
 
 	abstract updateStyles(): void;
 
-	layout(dimension: Dimension): void {
+	layout(dimension: Dimension | undefined): void {
 		if (this.breadcrumbsControl) {
 			this.breadcrumbsControl.layout(undefined);
 		}

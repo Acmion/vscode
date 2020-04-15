@@ -418,9 +418,19 @@ export interface IEditorGroup {
 	readonly previewEditor: IEditorInput | null;
 
 	/**
-	 * The number of opend editors in this group.
+	 * The number of opened editors in this group.
 	 */
 	readonly count: number;
+
+	/**
+	 * The number of hard pinned editors in this group.
+	 */
+	readonly hardPinnedCount: number;
+
+	/**
+	 * The number of not hard pinned editors in this group.
+	 */
+	readonly notHardPinnedCount: number;
 
 	/**
 	 * All opened editors in the group. There can only be one editor active.
@@ -536,6 +546,15 @@ export interface IEditorGroup {
 	 * if unspecified.
 	 */
 	pinEditor(editor?: IEditorInput): void;
+
+	/**
+	 * Set an editor to be hard pinned. A hard pinned editor is visible regardless
+	 * of how the tab bar is scrolled.
+	 *
+	 * @param editor the editor to hard pin, or the currently active editor
+	 * if unspecified.
+	 */
+	hardPinEditor(editor?: IEditorInput): void;
 
 	/**
 	 * Move keyboard focus into the group.

@@ -298,6 +298,10 @@ export abstract class AbstractScrollableElement extends Widget {
 		this._revealOnScroll = value;
 	}
 
+	public getHorizontalScrollbar() {
+		return this._horizontalScrollbar;
+	}
+
 	// -------------------- mouse wheel scrolling --------------------
 
 	private _setListeningToMouseWheel(shouldListen: boolean): void {

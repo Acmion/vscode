@@ -86,6 +86,9 @@ export class EditorGroup extends Disposable {
 	private readonly _onDidEditorUnpin = this._register(new Emitter<EditorInput>());
 	readonly onDidEditorUnpin: Event<EditorInput> = this._onDidEditorUnpin.event;
 
+	private readonly _onDidEditorHardPin = this._register(new Emitter<EditorInput>());
+	readonly onDidEditorHardPin: Event<EditorInput> = this._onDidEditorPin.event;
+
 	//#endregion
 
 	private _id: GroupIdentifier;
@@ -93,6 +96,7 @@ export class EditorGroup extends Disposable {
 
 	private editors: EditorInput[] = [];
 	private mru: EditorInput[] = [];
+	private hardPinnedEditors: EditorInput[] = [];
 	private mapResourceToEditorCount: ResourceMap<number> = new ResourceMap<number>();
 
 	private preview: EditorInput | null = null; // editor in preview state
@@ -471,6 +475,20 @@ export class EditorGroup extends Disposable {
 		}
 	}
 
+	hardPin(editor: EditorInput): void {
+		const index = this.indexOf(editor);
+		if (index === -1) {
+			return; // not found
+		}
+
+		this.setActive(editor);
+
+		editor.setHardPinned(!editor.isHardPinned());
+
+		// Event
+		this._onDidEditorHardPin.fire(editor);
+	}
+
 	isPinned(editor: EditorInput): boolean;
 	isPinned(index: number): boolean;
 	isPinned(arg1: EditorInput | number): boolean {
@@ -493,6 +511,26 @@ export class EditorGroup extends Disposable {
 		}
 
 		return !this.matches(this.preview, editor);
+	}
+
+	isHardPinned(editor: EditorInput): boolean;
+	isHardPinned(index: number): boolean;
+	isHardPinned(arg1: EditorInput | number): boolean {
+		let editor: EditorInput;
+		let index: number;
+		if (typeof arg1 === 'number') {
+			editor = this.editors[arg1];
+			index = arg1;
+		} else {
+			editor = arg1;
+			index = this.indexOf(editor);
+		}
+
+		if (index === -1 || !editor) {
+			return false; // editor not found
+		}
+
+		return editor.isHardPinned();
 	}
 
 	private splice(index: number, del: boolean, editor?: EditorInput): void {
